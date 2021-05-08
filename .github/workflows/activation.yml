@@ -30,7 +30,7 @@ jobs:
       - name: Expose as artifact
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ steps.getManualLicenseFile.outputs.filePath }}
-          path: ${{ matrix.os }}_${{ steps.getManualLicenseFile.outputs.filePath }}
+          name: ${{ matrix.os }}_${{ steps.getManualLicenseFile.outputs.filePath }}
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
       - name: Next steps
         run: echo "Visit https://license.unity3d.com/manual and upload the file. Then set a secret on the repo UNITY_CI_{snakeCasedTargetPlatform}"
