@@ -13,6 +13,14 @@ public class EditTestScript
         // Use the Assert class to test conditions
         Assert.AreEqual(1, 1);
     }
+    
+    // A Test behaves as an ordinary method
+    [Test]
+    public void StringCompareSucceeds()
+    {
+        // Use the Assert class to test conditions
+        Assert.AreEqual("hi", "hi");
+    }
 
     // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
     // `yield return null;` to skip a frame.
