@@ -3,10 +3,7 @@
 # https://game.ci/docs/github/activation#converting-into-a-license
 #
 # That license should then be added to secrets for the repo, using the format
-# UNITY_CI_{snakeCasedTargetPlatform}
-# For example
-# UNITY_CI_WINDOWS_LATEST = "{fileContents}"
-#
+# UNITY_LICENSE={valueFromLicenseFileUnityProvides}
 # See https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md
 #
 name: Acquire CI Activation File
@@ -33,4 +30,4 @@ jobs:
           name: ${{ matrix.os }}_${{ steps.getManualLicenseFile.outputs.filePath }}
           path: ${{ steps.getManualLicenseFile.outputs.filePath }}
       - name: Next steps
-        run: echo "Visit https://license.unity3d.com/manual and upload the file. Then set a secret on the repo UNITY_CI_{snakeCasedTargetPlatform}"
+        run: echo "Visit https://license.unity3d.com/manual and upload the file. Then set a secret on the repo UNITY_LICENSE"
