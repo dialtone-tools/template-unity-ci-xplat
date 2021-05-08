@@ -1,0 +1,38 @@
+# This action is necessary to run when a new CI activation file is needed
+# It is expected that the output file contents are used to obtain a license, as instructed here
+# https://game.ci/docs/github/activation#converting-into-a-license
+#
+# That license should then be added to secrets for the repo, using the format
+# UNITY_CI_{snakeCasedTargetPlatform}
+# For example
+# UNITY_CI_WINDOWS_LATEST = "{fileContents}"
+#
+# See https://github.com/Azure/actions-workflow-samples/blob/master/assets/create-secrets-for-GitHub-workflows.md
+#
+name: Acquire CI Activation File
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      targetPlatform:
+        description: 'The build platform to obtain an activation file for.'     
+        required: true
+        default: 'windows-latest'
+
+jobs:
+  obtainActivation:
+    runs-on: ${{ github.events.inputs.targetPlatform }}
+    steps:
+      # Request manual activation file
+      - name: Request manual activation file
+        id: getManualLicenseFile
+        uses: game-ci/unity-request-activation-file@v2
+
+      # Upload artifact (Unity_v20XX.X.XXXX.alf)
+      - name: Expose as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+      - name: Next steps
+        run: echo "Visit https://license.unity3d.com/manual and upload the file. Then set a secret on the repo UNITY_CI_{snakeCasedTargetPlatform}"
