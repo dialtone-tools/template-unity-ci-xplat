@@ -15,6 +15,7 @@ jobs:
   artifactPrLinker:
     name: Add Artifact PR Links
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: add artifact links to pull request and related issues step
         uses: tonyhallett/artifacts-url-comments@v1.1.0
