@@ -13,15 +13,13 @@ name: Acquire CI Activation File
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      targetPlatform:
-        description: 'The build platform to obtain an activation file for.'     
-        required: true
-        default: 'windows-latest'
 
 jobs:
   obtainActivation:
-    runs-on: ${{ github.events.inputs.targetPlatform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
       # Request manual activation file
       - name: Request manual activation file
@@ -33,6 +31,6 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: ${{ steps.getManualLicenseFile.outputs.filePath }}
-          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          path: ${{ matrix.os }}_${{ steps.getManualLicenseFile.outputs.filePath }}
       - name: Next steps
         run: echo "Visit https://license.unity3d.com/manual and upload the file. Then set a secret on the repo UNITY_CI_{snakeCasedTargetPlatform}"
