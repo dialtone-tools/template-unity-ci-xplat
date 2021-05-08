@@ -11,7 +11,47 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Tests
+  testAllModes:
+    name: Test in ${{ matrix.testMode }}
+    runs-on: ubuntu-latest
+    # Only run tests on PR (not directly on main)
+    if: github.event == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode:
+          - playmode
+          - editmode
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/cache@v2
+        with:
+          path: Library
+          key: Library-TestPlatform
+          restore-keys: |
+            Library-
+      - uses: game-ci/unity-test-runner@v2
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: ./
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: Test results for ${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+
+  # Builds
   buildForAllSupportedPlatforms:
+    needs: [testAllModes]
     name: Build ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
@@ -25,7 +65,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
           lfs: true
       - uses: actions/cache@v2
         with:
@@ -39,5 +78,5 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
       - uses: actions/upload-artifact@v2
         with:
-          name: Build-${{ matrix.targetPlatform }}
+          name: Build-${{ github.sha }}-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
