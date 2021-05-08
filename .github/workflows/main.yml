@@ -11,96 +11,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Windows targets
-  winBuilds:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        targetPlatform: [StandaloneWindows64, StandaloneWindows]
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      
-      # Cache library files
-      - uses: actions/cache@v2
-        with:
-          path: ./Library
-          key: Library-${{ github.repository }}-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ github.repository }}-
-            Library-
-
-      # Builds the game
-      - uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-        
-      # Capture the build as an artifact
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ github.sha }}_${{ matrix.targetPlatform }}
-          path: build
-  # Nix targets
-  nixBuilds:
+  buildForAllSupportedPlatforms:
+    name: Build ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        targetPlatform: [StandaloneLinux64]
+        targetPlatform:
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit).
+          - StandaloneWindows # Build a Windows standalone.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+          - StandaloneLinux64 # Build a Linux 64-bit standalone.
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      # Cache library files
+        with:
+          fetch-depth: 0
+          lfs: true
       - uses: actions/cache@v2
         with:
-          path: ./Library
-          key: Library-${{ github.repository }}-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ github.repository }}-
-            Library-
-
-      # Builds the game
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
       - uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-        
-      # Capture the build as an artifact
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.sha }}_${{ matrix.targetPlatform }}
-          path: build
-  # mac targets
-  macBuilds:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        targetPlatform: [StandaloneOSX]
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      
-      # Cache library files
-      - uses: actions/cache@v2
-        with:
-          path: ./Library
-          key: Library-${{ github.repository }}-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Library-${{ github.repository }}-
-            Library-
-
-      # Builds the game
-      - uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-        
-      # Capture the build as an artifact
-      - uses: actions/upload-artifact@v2
-        with:
-          name: ${{ github.sha }}_${{ matrix.targetPlatform }}
-          path: build
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
