@@ -1,0 +1,28 @@
+# Links artifacts as comments on PRs
+name: Artifact PR Linker
+
+# Controls when the action will run. 
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  artifactPrLinker:
+    name: Add Artifact PR Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: add artifact links to pull request and related issues step
+        uses: tonyhallett/artifacts-url-comments@v1.1.0
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            pullState: all
+            prefix: Here are the Playtest builds 
+            suffix: Have a nice day.
+            format: name
+            addTo: pull
